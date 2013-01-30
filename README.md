@@ -1,4 +1,8 @@
-clojurequil
-===========
 
-Playing with clojure quil keyboard input and sequences
+## About
+
+Basic loop for quil/clojure
+
+## License
+
+Distributed under the Eclipse Public License, the same as Clojure.
