@@ -21,6 +21,9 @@
         sequenceval (sequencegen)]
 		(text (str sequenceval @(state :message)) 20 60)))
 
+(defn board-at-pos [board pos]
+  1)
+
 (def direction-factor {:up    [ 0 -1]
                        :down  [ 0  1]
                        :left  [-1  0]

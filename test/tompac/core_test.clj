@@ -29,3 +29,7 @@
     (is (= (pacman-move [[0 0 0]
                          [0 0 0]] [2 0] :right) [0 0]))))
 
+(deftest get-board-at-position-test
+  (testing "getting the board value at a position"
+    (is (= (board-at-pos [[1 2 3]
+                          [4 5 6]] [0 0]) 1))))
