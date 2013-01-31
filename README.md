@@ -1,7 +1,15 @@
 
 ## About
 
-Basic loop for quil/clojure
+Our first attempt at implementing pacman
+
+# Run Tests
+
+lein test
+
+# Run Game
+
+lein run
 
 ## License
 
