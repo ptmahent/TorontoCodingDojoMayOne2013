@@ -21,18 +21,22 @@
         sequenceval (sequencegen)]
 		(text (str sequenceval @(state :message)) 20 60)))
 
-(def direction-factor {:left  [-1  0]
-                       :right [ 1  0]
-                       :up    [ 0 -1]
-                       :down  [ 0  1]})
+(def direction-factor {:up    [ 0 -1]
+                       :down  [ 0  1]
+                       :left  [-1  0]
+                       :right [ 1  0]})
+
+(def direction-dimension {:up    first
+                          :down  first
+                          :left  second
+                          :right second})
 
 (defn pacman-move [board pos direction] 
    (let [board-matrix (matrix board)
          board-dimentions (dim board-matrix)
          direction-factor (direction direction-factor)
-         board-dimension (if (contains? [:left :right] direction) 
-                             (first board-dimentions)
-                             (second board-dimentions))]
+         direction-dimension (direction direction-dimension) 
+         board-dimension (direction-dimension board-dimentions)]
     (matrix-map (fn [x] (mod x board-dimension)) 
       (plus pos direction-factor))))
 
