@@ -25,7 +25,7 @@
                        :up    [ 0 -1]
                        :down  [ 0  1]})
 
-(defn pacman-move [pos direction] 
+(defn pacman-move [board pos direction] 
    (incanter/plus pos (direction direction-factor)))
 
 (def valid-keys {
