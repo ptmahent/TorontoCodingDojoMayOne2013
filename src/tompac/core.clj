@@ -2,6 +2,7 @@
   (:use [quil.core] 
         [quil.helpers.seqs]
         [incanter.core :only [matrix dim plus matrix-map]])
+  (:require spyscope.core)
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
@@ -46,20 +47,59 @@
 (def params {:width  320
              :height 200})
 
+(def game-board [[0 0 0 0 0 0]
+                 [0 1 1 0 0 0]
+                 [0 0 0 0 1 0]
+                 [0 0 0 0 1 0]
+                 [0 0 0 0 0 0]])
+
+(def game-board-width (board-width game-board))
+(def game-board-height (board-height game-board))
+
+(def cell-width  (/ (:width  params) game-board-width))
+(def cell-height (/ (:height params) game-board-height))
+
+(def half-cell-width  (/ cell-width 2))
+(def half-cell-height (/ cell-height 2))
+
 (defn setup []
 	(smooth)
 	(frame-rate 30)
-	(set-state! 
-			:message (atom "START")
-			:sequence (seq->stream (steps))))
+	(set-state!
+      :pacman-pos (atom [2 2]) 
+			:direction (atom :left)
+			:partial-frame (seq->stream (cycle-between 0 5))))
+
+(defn identity2 [a b] [a b])
+
+(defn cell-center-x [x] (+ (* x cell-width) half-cell-width))
+(defn cell-center-y [y] (+ (* y cell-height) half-cell-height))
 
 (defn draw []
 	(background 0)
+  
+  ; The Grid
+  (fill 0 0 255)
+  (doseq [[y row] (map-indexed identity2 game-board)]
+    (doseq [[x value] (map-indexed identity2 row)]
+      (when (= 1 value) (ellipse 
+                          (cell-center-x x) 
+                          (cell-center-y y)
+                          cell-width
+                          cell-height))))    
 
-  (ellipse 100 100 20 20)
-	(let [sequencegen (state :sequence)
-        sequenceval (sequencegen)]
-		(text (str sequenceval @(state :message)) 20 60)))
+  ; Pac Man
+  (fill 255 255 0)
+  (ellipse (cell-center-x (first @(state :pacman-pos))) 
+           (cell-center-y (second @(state :pacman-pos)))
+           cell-width
+           cell-height)  
+  
+	(let [partial-frame-gen (state :partial-frame)
+        partial-frame-val (partial-frame-gen)]
+    (when (= 0 partial-frame-val) 
+      (reset! (state :pacman-pos) (pacman-move game-board @(state :pacman-pos) @(state :direction))))  
+		(text (str partial-frame-val @(state :direction)) 20 60)))
 
 (def valid-keys {
   KeyEvent/VK_UP :up
@@ -76,7 +116,7 @@
     the-key-code (key-code)
     the-key-pressed (if (= processing.core.PConstants/CODED (int raw-key)) the-key-code raw-key)
     move (get valid-keys the-key-pressed :still)]
-    (reset! (state :message) (str "KEY: " move))))
+    (reset! (state :direction) move)))
 
 (defn -main [& args]
 	(defsketch pacman 
