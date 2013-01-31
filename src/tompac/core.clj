@@ -1,6 +1,7 @@
 (ns tompac.core
-  (:use quil.core quil.helpers.seqs)
-  (:require [incanter.core :as incanter])
+  (:use [quil.core] 
+        [quil.helpers.seqs]
+        [incanter.core :only [matrix dim plus matrix-map]])
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
@@ -26,7 +27,14 @@
                        :down  [ 0  1]})
 
 (defn pacman-move [board pos direction] 
-   (incanter/plus pos (direction direction-factor)))
+   (let [board-matrix (matrix board)
+         board-dimentions (dim board-matrix)
+         direction-factor (direction direction-factor)
+         board-dimension (if (contains? [:left :right] direction) 
+                             (first board-dimentions)
+                             (second board-dimentions))]
+    (matrix-map (fn [x] (mod x board-dimension)) 
+      (plus pos direction-factor))))
 
 (def valid-keys {
   KeyEvent/VK_UP :up
