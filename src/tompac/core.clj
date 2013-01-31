@@ -5,21 +5,8 @@
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
-
-(defn setup []
-	(smooth)
-	(frame-rate 30)
-	(set-state! 
-			:message (atom "START")
-			:sequence (seq->stream (steps))))
-
-(defn draw []
-	(background 0)
-
-  (ellipse 100 100 20 20)
-	(let [sequencegen (state :sequence)
-        sequenceval (sequencegen)]
-		(text (str sequenceval @(state :message)) 20 60)))
+(defn board-width [board]
+  (second (dim (matrix board))))
 
 (defn board-at-pos [board pos]
   (let [xpos (first pos)
@@ -47,6 +34,30 @@
         board-at-potential-new-pos (board-at-pos board potential-new-pos)]
     (if (= 0 board-at-potential-new-pos) potential-new-pos pos)))
 
+
+;; Model up from here
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Graphics here on down
+
+
+(def params {:width  320
+             :height 200})
+
+(defn setup []
+	(smooth)
+	(frame-rate 30)
+	(set-state! 
+			:message (atom "START")
+			:sequence (seq->stream (steps))))
+
+(defn draw []
+	(background 0)
+
+  (ellipse 100 100 20 20)
+	(let [sequencegen (state :sequence)
+        sequenceval (sequencegen)]
+		(text (str sequenceval @(state :message)) 20 60)))
+
 (def valid-keys {
   KeyEvent/VK_UP :up
   KeyEvent/VK_DOWN :down
@@ -70,5 +81,5 @@
 		:setup setup
 		:draw draw
 		:key-pressed key-press
-		:size [320 200]
+		:size [(:width params) (:height params)]
 		))

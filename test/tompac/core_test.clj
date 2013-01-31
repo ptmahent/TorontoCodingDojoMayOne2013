@@ -54,3 +54,10 @@
     (is (= (pacman-move [[0 1]
                          [0 1]] [0 0] :right) [0 0]))))
 
+
+(deftest board-width-test 
+  (testing "board width"
+    (is (= 1 (board-width [[0]]     )))
+    (is (= 2 (board-width [[0 0]]   )))
+    (is (= 3 (board-width [[0 0 0]] )))))
+
