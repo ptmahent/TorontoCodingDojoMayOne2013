@@ -22,7 +22,10 @@
 		(text (str sequenceval @(state :message)) 20 60)))
 
 (defn board-at-pos [board pos]
-  1)
+  (let [xpos (first pos)
+        ypos (second pos)
+        row  (nth board ypos)]
+    (nth row xpos)))
 
 (def direction-factor {:up    [ 0 -1]
                        :down  [ 0  1]
