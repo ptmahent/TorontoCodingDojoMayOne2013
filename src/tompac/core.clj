@@ -1,5 +1,6 @@
 (ns tompac.core
   (:use quil.core quil.helpers.seqs)
+  (:require [incanter.core :as incanter])
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
@@ -19,51 +20,13 @@
         sequenceval (sequencegen)]
 		(text (str sequenceval @(state :message)) 20 60)))
 
-(defn pacman-move-left [state]
-  (if (= (-> state :pac-man :x) 0) state 
-  (update-in state [:pac-man :x]  dec)) )
+(def direction-factor {:left  [-1  0]
+                       :right [ 1  0]
+                       :up    [ 0 -1]
+                       :down  [ 0  1]})
 
-(defn can-move? [pac-man board size direction]
-  (when (= 0 
-    (get board 
-      (inc 
-        (+  (* size (:y pac-man))
-            (:x pac-man))))
-    true
-)))
-
-(defn board [state]
-  (-> state :board :map))
-
-(defn pacman-move-right [state]
-  (let [pac-man (:pac-man state)
-        board (board state)
-        size (-> state :board :size)
-    ]
-    (println "can move?" 
-      (can-move? pac-man board size :right))
-
-  (if (= (-> state :pac-man :x) (-> state :board :right))
-    (assoc-in state [:pac-man :x] 0)
-    (update-in state [:pac-man :x] inc))))
-(defn pacman-move-up [state]
-  (if (= (-> state :pac-man :y) 0) state 
-  (update-in state [:pac-man :y]  dec)) )
-(defn pacman-move-down [state]
-  (if (= (-> state :pac-man :y) 0) state 
-  (update-in state [:pac-man :y]  inc)) )
-
-(defn pacman-move [statemap direction]
-  (case direction
-    :left (pacman-move-left statemap)
-    :right (pacman-move-right statemap)
-    :up (pacman-move-up statemap)
-    :down (pacman-move-down statemap))
-
-) 
-   
-
-
+(defn pacman-move [pos direction] 
+   (incanter/plus pos (direction direction-factor)))
 
 (def valid-keys {
   KeyEvent/VK_UP :up
