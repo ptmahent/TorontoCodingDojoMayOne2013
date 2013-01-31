@@ -61,3 +61,13 @@
     (is (= 2 (board-width [[0 0]]   )))
     (is (= 3 (board-width [[0 0 0]] )))))
 
+
+(deftest board-height-test 
+  (testing "board height"
+    (is (= 1 (board-height [[0]] )))
+    (is (= 2 (board-height [[0]
+                            [0]] )))
+    (is (= 3 (board-height [[0]
+                            [0]
+                            [0]] )))))
+

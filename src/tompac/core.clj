@@ -8,6 +8,9 @@
 (defn board-width [board]
   (second (dim (matrix board))))
 
+(defn board-height [board]
+  (first (dim (matrix board))))
+
 (defn board-at-pos [board pos]
   (let [xpos (first pos)
         ypos (second pos)
