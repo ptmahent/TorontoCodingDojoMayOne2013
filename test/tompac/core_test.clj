@@ -39,3 +39,18 @@
   (testing "getting the board value at a position"
     (is (= (board-at-pos [[1 2 3]
                           [4 5 6]] [1 1]) 5))))
+
+(deftest pacman-move-walls-test
+  (testing "Move pacman up into wall"
+    (is (= (pacman-move [[1 1]
+                         [0 0]] [0 1]    :up) [0 1])))
+  (testing "Move pacman down down into wall"
+    (is (= (pacman-move [[0 0]
+                         [1 1]] [0 0]  :down) [0 0])))
+  (testing "Move pacman left wrapping around board"
+    (is (= (pacman-move [[1 0]
+                         [1 0]] [1 0]  :left) [1 0])))
+  (testing "Move pacman right wrapping around board"
+    (is (= (pacman-move [[0 1]
+                         [0 1]] [0 0] :right) [0 0]))))
+

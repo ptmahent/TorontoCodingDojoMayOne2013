@@ -38,13 +38,14 @@
                           :right second})
 
 (defn pacman-move [board pos direction] 
-   (let [board-matrix (matrix board)
-         board-dimentions (dim board-matrix)
-         direction-factor (direction direction-factor)
-         direction-dimension (direction direction-dimension) 
-         board-dimension (direction-dimension board-dimentions)]
-    (matrix-map (fn [x] (mod x board-dimension)) 
-      (plus pos direction-factor))))
+  (let [board-matrix (matrix board)
+        board-dimentions (dim board-matrix)
+        direction-factor (direction direction-factor)
+        direction-dimension (direction direction-dimension) 
+        board-dimension (direction-dimension board-dimentions)
+        potential-new-pos (matrix-map (fn [x] (mod x board-dimension)) (plus pos direction-factor))
+        board-at-potential-new-pos (board-at-pos board potential-new-pos)]
+    (if (= 0 board-at-potential-new-pos) potential-new-pos pos)))
 
 (def valid-keys {
   KeyEvent/VK_UP :up
