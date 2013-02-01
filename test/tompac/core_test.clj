@@ -90,3 +90,33 @@
   (testing "next pos other"
     (is (= (next-pos [1 1] :other) [1 1]))))
 
+(deftest learn-about-mod-2 
+  (is (= (mod -1 2) 1))
+  (is (= (mod  0 2) 0))
+  (is (= (mod  1 2) 1))
+  (is (= (mod  2 2) 0)))
+
+(deftest wrap-test
+  (testing "within 2x2 board"
+    (is (= (wrap [2 2] [ 1  0]) [1 0])))
+  (testing "outside 2x2 board left"
+    (is (= (wrap [2 2] [-1  0]) [1 0])))
+  (testing "outside 2x2 right"
+    (is (= (wrap [2 2] [ 2  0]) [0 0])))
+  (testing "within 3x2 board"
+    (is (= (wrap [3 2] [ 1  0]) [1 0])))
+  (testing "outside 3x2 board left"
+    (is (= (wrap [3 2] [-1  0]) [2 0])))
+  (testing "outside 3x2 right"
+    (is (= (wrap [3 2] [ 3  0]) [0 0])))
+  (testing "outside 2x2 board up"
+    (is (= (wrap [2 2] [ 0 -1]) [0 1])))
+  (testing "outside 2x2 board down"
+    (is (= (wrap [2 2] [ 0  2]) [0 0])))
+  (testing "within 2x3 board"
+    (is (= (wrap [2 3] [ 1  0]) [1 0])))
+  (testing "outside 2x3 board left"
+    (is (= (wrap [2 3] [ 0 -1]) [0 2])))
+  (testing "outside 3x2 right"
+    (is (= (wrap [2 3] [ 0  3]) [0 0]))))
+

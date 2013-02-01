@@ -50,18 +50,26 @@
            :left  :horizontal
            :right :horizontal})
 
-(defn update-first [s delta]
-  (vector (+ delta (first s)) (second s)))
+(defn update-first [s update]
+  (vector (update (first s)) (second s)))
 
-(defn update-second [s delta]
-  (vector (first s) (+ delta (second s))))
+(defn update-second [s update]
+  (vector (first s) (update (second s))))
 
 (defn next-pos [pos direction]
   (case (direction axis) 
-    :horizontal (update-first pos (direction delta))
-    :vertical  (update-second pos (direction delta))
+    :horizontal (update-first pos (partial + (direction delta)))
+    :vertical  (update-second pos (partial + (direction delta)))
     pos))
 
+(defn wrap [dimensions pos]
+  (-> pos 
+      (update-first  (fn [x] (mod x (first dimensions))))
+      (update-second (fn [x] (mod x (second dimensions)))))) 
+ 
+
+; (defn pacman-move [board pos direction] 
+;   (wrap (dimentions board) (next-pos pos direction)))
 
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
