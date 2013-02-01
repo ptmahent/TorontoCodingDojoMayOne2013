@@ -6,16 +6,19 @@
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
+(defn board-dim [board]
+	; reverse to be consistent with pos
+  ; i.e. pos is [x y] and dim is [width height]
+  (reverse (dim (matrix board))))
+
 (defn board-width [board]
-  (second (dim (matrix board))))
+  (-> board board-dim first))
 
 (defn board-height [board]
-  (first (dim (matrix board))))
+  (-> board board-dim second))
 
-(defn board-at-pos [board pos]
-  (let [xpos (first pos)
-        ypos (second pos)
-        row  (nth board ypos)]
+(defn board-at-pos [board [xpos ypos]]
+  (let [row (nth board ypos)]
     (nth row xpos)))
 
 (def direction-factor {:up    [ 0 -1]
@@ -23,18 +26,11 @@
                        :left  [-1  0]
                        :right [ 1  0]})
 
-(def direction-dimension {:up    first
-                          :down  first
-                          :left  second
-                          :right second})
-
 (defn pacman-move [board pos direction] 
-  (let [board-matrix (matrix board)
-        board-dimentions (dim board-matrix)
+  (let [board-dimensions (board-dim board)
         direction-factor (direction direction-factor)
-        direction-dimension (direction direction-dimension) 
-        board-dimension (direction-dimension board-dimentions)
-        potential-new-pos (matrix-map (fn [x] (mod x board-dimension)) (plus pos direction-factor))
+        absolute-new-pos (plus pos direction-factor)
+        potential-new-pos (map mod absolute-new-pos board-dimensions)
         board-at-potential-new-pos (board-at-pos board potential-new-pos)]
     (if (= 0 board-at-potential-new-pos) potential-new-pos pos)))
 
@@ -45,13 +41,29 @@
 
 
 (def params {:width  320
-             :height 200})
+             :height 400})
 
-(def game-board [[0 0 0 0 0 0]
-                 [0 1 1 0 0 0]
-                 [0 0 0 0 1 0]
-                 [0 0 0 0 1 0]
-                 [0 0 0 0 0 0]])
+(def game-board [[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
+                 [1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 0 1]
+                 [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 0 1]
+                 [1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 1]
+                 [1 1 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 1 1 2 1 1 0 1 0 1 1 1 1]
+                 [0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0]
+                 [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
+                 [1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 0 1]
+                 [1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1]
+                 [1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1]
+                 [1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 1]
+                 [1 0 1 1 1 1 1 1 0 1 0 1 1 1 1 1 1 0 1]
+                 [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+                 [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]])
 
 (def game-board-width (board-width game-board))
 (def game-board-height (board-height game-board))
@@ -64,29 +76,39 @@
 
 (defn setup []
 	(smooth)
-	(frame-rate 30)
+	(frame-rate 60)
 	(set-state!
-      :pacman-pos (atom [2 2]) 
+      :pacman-pos (atom [1 1]) 
 			:direction (atom :left)
 			:partial-frame (seq->stream (cycle-between 0 5))))
 
-(defn identity2 [a b] [a b])
+(defn cell-top-x [x] (* x cell-width))
+(defn cell-top-y [y] (* y cell-height))
+(defn cell-center-x [x] (+ (cell-top-x x) half-cell-width))
+(defn cell-center-y [y] (+ (cell-top-y y) half-cell-height))
 
-(defn cell-center-x [x] (+ (* x cell-width) half-cell-width))
-(defn cell-center-y [y] (+ (* y cell-height) half-cell-height))
+(defn draw-rect [x y width height]
+  (rect (cell-top-x x) (cell-top-y y) width height))
+
+(defn draw-wall-brick [x y]
+  (fill 0 0 255)
+  (draw-rect x y cell-width cell-height))
+
+(defn draw-ghosts-door [x y]
+  (fill 255 255 255)
+  (draw-rect x y cell-width (/ cell-height 4)))
 
 (defn draw []
 	(background 0)
   
   ; The Grid
-  (fill 0 0 255)
-  (doseq [[y row] (map-indexed identity2 game-board)]
-    (doseq [[x value] (map-indexed identity2 row)]
-      (when (= 1 value) (ellipse 
-                          (cell-center-x x) 
-                          (cell-center-y y)
-                          cell-width
-                          cell-height))))    
+  (doseq [[y row] (map-indexed vector game-board)]
+    (doseq [[x value] (map-indexed vector row)]
+      (case 
+        value
+        1 (draw-wall-brick x y)
+        2 (draw-ghosts-door x y)
+        nil)))
 
   ; Pac Man
   (fill 255 255 0)
@@ -97,9 +119,8 @@
   
 	(let [partial-frame-gen (state :partial-frame)
         partial-frame-val (partial-frame-gen)]
-    (when (= 0 partial-frame-val) 
-      (reset! (state :pacman-pos) (pacman-move game-board @(state :pacman-pos) @(state :direction))))  
-		(text (str partial-frame-val @(state :direction)) 20 60)))
+    (when (and (= 0 partial-frame-val) (state :pacman-pos)) 
+      (reset! (state :pacman-pos) (pacman-move game-board @(state :pacman-pos) @(state :direction))))))
 
 (def valid-keys {
   KeyEvent/VK_UP :up
@@ -124,5 +145,4 @@
 		:setup setup
 		:draw draw
 		:key-pressed key-press
-		:size [(:width params) (:height params)]
-		))
+		:size [(:width params) (:height params)]))

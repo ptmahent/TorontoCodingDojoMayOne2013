@@ -71,3 +71,9 @@
                             [0]
                             [0]] )))))
 
+(deftest board-dim-test
+  (testing "board dim"
+    (is (= [2 3] (board-dim [[0 0]
+                             [0 0]
+                             [0 0]])))))
+
