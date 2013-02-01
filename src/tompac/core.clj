@@ -51,8 +51,8 @@
         row  (nth board ypos)]
     (nth row xpos)))
 
-(defn wall? [board pos direction] 
-  (= 1 (board-at-pos board (move board pos direction))))
+(defn open? [board pos direction] 
+  (= 0 (board-at-pos board (move board pos direction))))
 
 
 
@@ -113,9 +113,10 @@
            cell-height)  
   
 	(let [partial-frame-gen (state :partial-frame)
-        partial-frame-val (partial-frame-gen)]
+        partial-frame-val (partial-frame-gen)
+        potential-next-pos (move game-board @(state :pacman-pos) @(state :direction))]
     (when (= 0 partial-frame-val) 
-      (reset! (state :pacman-pos) (move game-board @(state :pacman-pos) @(state :direction))))  
+      (reset! (state :pacman-pos) potential-next-pos))  
 		(text (str partial-frame-val @(state :direction)) 20 60)))
 
 (def key-directions {
@@ -133,7 +134,7 @@
     the-key-code (key-code)
     the-key-pressed (if (= processing.core.PConstants/CODED (int raw-key)) the-key-code raw-key)
     key-direction (get key-directions the-key-pressed nil)]
-    (when (and key-direction (not (wall? game-board @(state :pacman-pos) key-direction)))
+    (when (and key-direction (open? game-board @(state :pacman-pos) key-direction))
       (reset! (state :direction) key-direction))))
 
 (defn -main [& args]
