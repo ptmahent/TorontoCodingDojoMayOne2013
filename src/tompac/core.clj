@@ -118,7 +118,7 @@
       (reset! (state :pacman-pos) (move game-board @(state :pacman-pos) @(state :direction))))  
 		(text (str partial-frame-val @(state :direction)) 20 60)))
 
-(def valid-keys {
+(def key-directions {
   KeyEvent/VK_UP :up
   KeyEvent/VK_DOWN :down
   KeyEvent/VK_LEFT :left
@@ -132,8 +132,9 @@
   (let [raw-key (raw-key)
     the-key-code (key-code)
     the-key-pressed (if (= processing.core.PConstants/CODED (int raw-key)) the-key-code raw-key)
-    move (get valid-keys the-key-pressed :still)]
-    (reset! (state :direction) move)))
+    key-direction (get key-directions the-key-pressed nil)]
+    (when (and key-direction (not (wall? game-board @(state :pacman-pos) key-direction)))
+      (reset! (state :direction) key-direction))))
 
 (defn -main [& args]
 	(defsketch pacman 
