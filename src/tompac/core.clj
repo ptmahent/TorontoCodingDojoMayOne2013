@@ -12,33 +12,8 @@
 (defn board-height [board]
   (first (dim (matrix board))))
 
-(defn board-at-pos [board pos]
-  (let [xpos (first pos)
-        ypos (second pos)
-        row  (nth board ypos)]
-    (nth row xpos)))
-
-(def direction-dimension {:up    first
-                          :down  first
-                          :left  second
-                          :right second})
-
-
-(def direction-factor {:up    [ 0 -1]
-                       :down  [ 0  1]
-                       :left  [-1  0]
-                       :right [ 1  0]})
-
-
-(defn pacman-move [board pos direction] 
-  (let [board-matrix (matrix board)
-        board-dimentions (dim board-matrix)
-        direction-factor (direction direction-factor)
-        direction-dimension (direction direction-dimension) 
-        board-dimension (direction-dimension board-dimentions)
-        potential-new-pos (matrix-map (fn [x] (mod x board-dimension)) (plus pos direction-factor))
-        board-at-potential-new-pos (board-at-pos board potential-new-pos)]
-    (if (= 0 board-at-potential-new-pos) potential-new-pos pos)))
+(defn dimensions [board]
+  [(board-width board) (board-height board)])
 
 (def delta {:up    -1
             :right  1
@@ -66,10 +41,18 @@
   (-> pos 
       (update-first  (fn [x] (mod x (first dimensions))))
       (update-second (fn [x] (mod x (second dimensions)))))) 
- 
 
-; (defn pacman-move [board pos direction] 
-;   (wrap (dimentions board) (next-pos pos direction)))
+(defn move [board pos direction] 
+  (wrap (dimensions board) (next-pos pos direction)))
+
+(defn board-at-pos [board pos]
+  (let [xpos (first pos)
+        ypos (second pos)
+        row  (nth board ypos)]
+    (nth row xpos)))
+
+(defn wall? [board pos direction] 
+  true)
 
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -130,7 +113,7 @@
 	(let [partial-frame-gen (state :partial-frame)
         partial-frame-val (partial-frame-gen)]
     (when (= 0 partial-frame-val) 
-      (reset! (state :pacman-pos) (pacman-move game-board @(state :pacman-pos) @(state :direction))))  
+      (reset! (state :pacman-pos) (move game-board @(state :pacman-pos) @(state :direction))))  
 		(text (str partial-frame-val @(state :direction)) 20 60)))
 
 (def valid-keys {
