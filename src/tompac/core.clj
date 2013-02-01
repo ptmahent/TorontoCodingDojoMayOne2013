@@ -115,7 +115,7 @@
 	(let [partial-frame-gen (state :partial-frame)
         partial-frame-val (partial-frame-gen)
         potential-next-pos (move game-board @(state :pacman-pos) @(state :direction))]
-    (when (= 0 partial-frame-val) 
+    (when (and (= 0 partial-frame-val) (open? game-board @(state :pacman-pos) @(state :direction)))
       (reset! (state :pacman-pos) potential-next-pos))  
 		(text (str partial-frame-val @(state :direction)) 20 60)))
 
