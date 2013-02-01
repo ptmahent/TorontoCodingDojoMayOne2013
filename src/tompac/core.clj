@@ -18,15 +18,17 @@
         row  (nth board ypos)]
     (nth row xpos)))
 
+(def direction-dimension {:up    first
+                          :down  first
+                          :left  second
+                          :right second})
+
+
 (def direction-factor {:up    [ 0 -1]
                        :down  [ 0  1]
                        :left  [-1  0]
                        :right [ 1  0]})
 
-(def direction-dimension {:up    first
-                          :down  first
-                          :left  second
-                          :right second})
 
 (defn pacman-move [board pos direction] 
   (let [board-matrix (matrix board)
@@ -38,6 +40,28 @@
         board-at-potential-new-pos (board-at-pos board potential-new-pos)]
     (if (= 0 board-at-potential-new-pos) potential-new-pos pos)))
 
+(def delta {:up    -1
+            :right  1
+            :down   1
+            :left  -1})
+
+(def axis {:up   :vertical
+           :down :vertical
+           :left  :horizontal
+           :right :horizontal})
+
+(defn update-first [s delta]
+  (vector (+ delta (first s)) (second s)))
+
+(defn update-second [s delta]
+  (vector (first s) (+ delta (second s))))
+
+(defn next-pos [pos direction]
+  (case (direction axis) 
+    :horizontal (update-first pos (direction delta))
+    :vertical  (update-second pos (direction delta))
+    pos))
+
 
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -47,7 +71,7 @@
 (def params {:width  320
              :height 200})
 
-(def game-board [[0 0 0 0 0 0]
+(def game-board [[0 1 1 0 0 0]
                  [0 1 1 0 0 0]
                  [0 0 0 0 1 0]
                  [0 0 0 0 1 0]
