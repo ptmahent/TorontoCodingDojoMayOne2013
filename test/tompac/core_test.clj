@@ -106,16 +106,19 @@
                           [4 5 6]] [1 1]) 5))))
                 
 (deftest wall-test
+  (testing "open space up"
+    (is (= (wall? [[0 0]
+                   [0 0]] [0 1]    :up) false)))
   (testing "wall up"
     (is (= (wall? [[1 1]
-                   [0 0]] [0 1]    :up) true))))
-  ; (testing "Move down down into wall"
-  ;   (is (= (move [[0 0]
-  ;                        [1 1]] [0 0]  :down) [0 0])))
-  ; (testing "Move left wrapping around board"
-  ;   (is (= (move [[1 0]
-  ;                        [1 0]] [1 0]  :left) [1 0])))
-  ; (testing "Move right wrapping around board"
-  ;   (is (= (move [[0 1]
-  ;                        [0 1]] [0 0] :right) [0 0]))))
+                   [0 0]] [0 1]    :up) true)))
+  (testing "wall down"
+    (is (= (wall? [[0 0]
+                   [1 1]] [0 0]  :down) true)))
+  (testing "wall left wrapping around board"
+    (is (= (wall? [[1 0]
+                   [1 0]] [1 0]  :left) true)))
+  (testing "wall right wrapping around board"
+    (is (= (wall? [[0 1]
+                   [0 1]] [0 0] :right) true))))
 

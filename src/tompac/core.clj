@@ -52,7 +52,9 @@
     (nth row xpos)))
 
 (defn wall? [board pos direction] 
-  true)
+  (= 1 (board-at-pos board (move board pos direction))))
+
+
 
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
