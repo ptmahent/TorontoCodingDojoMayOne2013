@@ -1,8 +1,6 @@
 (ns tompac.core
   (:use [quil.core] 
-        [quil.helpers.seqs]
-        [incanter.core :only [matrix dim plus matrix-map]])
-  (:require spyscope.core)
+        [quil.helpers.seqs])
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
@@ -103,8 +101,8 @@
 	(smooth)
 	(frame-rate 60)
 	(set-state!
-      :pacman-pos (atom [1 1]) 
-			:direction (atom :left)
+      :pacman-pos (atom [9 15]) 
+			:direction (atom :down)
 			:partial-frame (seq->stream (cycle-between 0 5))))
 
 (defn cell-top-x [x] (* x cell-width))
