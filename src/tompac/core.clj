@@ -4,18 +4,13 @@
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
-(defn board-dim [board]
-	; reverse to be consistent with pos
-  ; i.e. pos is [x y] and dim is [width height]
-  (reverse (dim (matrix board))))
-
 (defn board-width [board]
-  (-> board board-dim first))
+  (-> board first count))
 
 (defn board-height [board]
-  (-> board board-dim second))
+  (-> board count))
 
-(defn dimensions [board]
+(defn board-dim [board]
   [(board-width board) (board-height board)])
 
 (def delta {:up    -1
@@ -46,7 +41,7 @@
       (update-second (fn [x] (mod x (second dimensions)))))) 
 
 (defn move [board pos direction] 
-  (wrap (dimensions board) (next-pos pos direction)))
+  (wrap (board-dim board) (next-pos pos direction)))
 
 (defn board-at-pos [board pos]
   (let [xpos (first pos)

@@ -17,8 +17,8 @@
                             [0]
                             [0]] )))))
 
-(deftest dimentions-test 
-  (is (= [3 2] (dimensions [[1 2 3]
+(deftest board-dim-test 
+  (is (= [3 2] (board-dim  [[1 2 3]
                             [4 5 6]]))))
 
 (deftest next-pos-test
