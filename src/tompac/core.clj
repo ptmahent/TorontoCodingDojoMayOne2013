@@ -6,11 +6,16 @@
   (:import java.awt.event.KeyEvent)
   (:gen-class))
 
+(defn board-dim [board]
+	; reverse to be consistent with pos
+  ; i.e. pos is [x y] and dim is [width height]
+  (reverse (dim (matrix board))))
+
 (defn board-width [board]
-  (second (dim (matrix board))))
+  (-> board board-dim first))
 
 (defn board-height [board]
-  (first (dim (matrix board))))
+  (-> board board-dim second))
 
 (defn dimensions [board]
   [(board-width board) (board-height board)])
@@ -55,20 +60,35 @@
   (= 0 (board-at-pos board (move board pos direction))))
 
 
-
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graphics here on down
 
 
 (def params {:width  320
-             :height 200})
+             :height 400})
 
-(def game-board [[0 1 1 0 0 0]
-                 [0 1 1 0 0 0]
-                 [0 0 0 0 1 0]
-                 [0 0 0 0 1 0]
-                 [0 0 0 0 0 0]])
+(def game-board [[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
+                 [1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 0 1]
+                 [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 0 1]
+                 [1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 1]
+                 [1 1 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 1 1 2 1 1 0 1 0 1 1 1 1]
+                 [0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0]
+                 [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
+                 [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
+                 [1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1]
+                 [1 0 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 0 1]
+                 [1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1]
+                 [1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1]
+                 [1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 1]
+                 [1 0 1 1 1 1 1 1 0 1 0 1 1 1 1 1 1 0 1]
+                 [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+                 [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]])
 
 (def game-board-width (board-width game-board))
 (def game-board-height (board-height game-board))
@@ -81,29 +101,39 @@
 
 (defn setup []
 	(smooth)
-	(frame-rate 30)
+	(frame-rate 60)
 	(set-state!
-      :pacman-pos (atom [2 2]) 
+      :pacman-pos (atom [1 1]) 
 			:direction (atom :left)
 			:partial-frame (seq->stream (cycle-between 0 5))))
 
-(defn identity2 [a b] [a b])
+(defn cell-top-x [x] (* x cell-width))
+(defn cell-top-y [y] (* y cell-height))
+(defn cell-center-x [x] (+ (cell-top-x x) half-cell-width))
+(defn cell-center-y [y] (+ (cell-top-y y) half-cell-height))
 
-(defn cell-center-x [x] (+ (* x cell-width) half-cell-width))
-(defn cell-center-y [y] (+ (* y cell-height) half-cell-height))
+(defn draw-rect [x y width height]
+  (rect (cell-top-x x) (cell-top-y y) width height))
+
+(defn draw-wall-brick [x y]
+  (fill 0 0 255)
+  (draw-rect x y cell-width cell-height))
+
+(defn draw-ghosts-door [x y]
+  (fill 255 255 255)
+  (draw-rect x y cell-width (/ cell-height 4)))
 
 (defn draw []
 	(background 0)
   
   ; The Grid
-  (fill 0 0 255)
-  (doseq [[y row] (map-indexed identity2 game-board)]
-    (doseq [[x value] (map-indexed identity2 row)]
-      (when (= 1 value) (ellipse 
-                          (cell-center-x x) 
-                          (cell-center-y y)
-                          cell-width
-                          cell-height))))    
+  (doseq [[y row] (map-indexed vector game-board)]
+    (doseq [[x value] (map-indexed vector row)]
+      (case 
+        value
+        1 (draw-wall-brick x y)
+        2 (draw-ghosts-door x y)
+        nil)))
 
   ; Pac Man
   (fill 255 255 0)
@@ -143,5 +173,4 @@
 		:setup setup
 		:draw draw
 		:key-pressed key-press
-		:size [(:width params) (:height params)]
-		))
+		:size [(:width params) (:height params)]))
