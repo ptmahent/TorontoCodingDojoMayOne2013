@@ -105,7 +105,7 @@
     (is (= (board-at-pos [[1 2 3]
                           [4 5 6]] [1 1]) 5))))
                 
-(deftest wall-test
+(deftest open-test
   (testing "open space up"
     (is (= (open? [[0 0]
                    [0 0]] [0 1]    :up) true)))
@@ -115,10 +115,10 @@
   (testing "wall down"
     (is (= (open? [[0 0]
                    [1 1]] [0 0]  :down) false)))
-  (testing "wall left wrapping around board"
+  (testing "wall left"
     (is (= (open? [[1 0]
                    [1 0]] [1 0]  :left) false)))
-  (testing "wall right wrapping around board"
+  (testing "wall right"
     (is (= (open? [[0 1]
                    [0 1]] [0 0] :right) false))))
 
@@ -128,3 +128,10 @@
                              [0 0]
                              [0 0]])))))
 
+(deftest move-if-open-test
+  (testing "moves when open"
+    (is (= (move-if-open [[0 0]
+                          [0 0]] [0 0] :right) [1 0])))
+  (testing "doesn't move when wall"
+    (is (= (move-if-open [[0 1]
+                          [0 1]] [0 0] :right) [0 0]))))

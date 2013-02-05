@@ -52,11 +52,34 @@
 (defn open? [board pos direction] 
   (= 0 (board-at-pos board (move board pos direction))))
 
+(defn move-if-open [board pos direction]
+  (if 
+    (open? board pos direction)
+    (move board pos direction)
+    pos))
 
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graphics here on down
 
+
+(defn setup []
+  (smooth)
+  (frame-rate 60)
+  (set-state!
+      :pacman-pos (atom [9 15]) 
+      :pacman-direction (atom :down)
+      :partial-frame (seq->stream (cycle-between 0 10))))
+
+(defn pacman-pos [] @(state :pacman-pos))
+(defn set-pacman-pos [pos]
+  (reset! (state :pacman-pos) pos))
+
+(defn pacman-dir [] @(state :pacman-direction))
+(defn set-pacman-dir [direction]
+  (reset! (state :pacman-direction) direction))
+
+(defn partial-frame [] ((state :partial-frame)))
 
 (def params {:width  320
              :height 400})
@@ -92,14 +115,6 @@
 (def half-cell-width  (/ cell-width 2))
 (def half-cell-height (/ cell-height 2))
 
-(defn setup []
-	(smooth)
-	(frame-rate 60)
-	(set-state!
-      :pacman-pos (atom [9 15]) 
-			:direction (atom :down)
-			:partial-frame (seq->stream (cycle-between 0 5))))
-
 (defn cell-top-x [x] (* x cell-width))
 (defn cell-top-y [y] (* y cell-height))
 (defn cell-center-x [x] (+ (cell-top-x x) half-cell-width))
@@ -114,12 +129,12 @@
 
 (defn draw-ghosts-door [x y]
   (fill 255 255 255)
-  (draw-rect x y cell-width (/ cell-height 4)))
-
+  (draw-rect x y cell-width (/ cell-height 4)))                                    
+                                    
 (defn draw []
 	(background 0)
   
-  ; The Grid
+  ; Draw the Grid
   (doseq [[y row] (map-indexed vector game-board)]
     (doseq [[x value] (map-indexed vector row)]
       (case 
@@ -128,20 +143,27 @@
         2 (draw-ghosts-door x y)
         nil)))
 
-  ; Pac Man
+  ; Draw Pac Man
   (fill 255 255 0)
-  (ellipse (cell-center-x (first @(state :pacman-pos))) 
-           (cell-center-y (second @(state :pacman-pos)))
+  (ellipse (cell-center-x (first (pacman-pos))) 
+           (cell-center-y (second (pacman-pos)))
            cell-width
            cell-height)  
   
-	(let [partial-frame-gen (state :partial-frame)
-        partial-frame-val (partial-frame-gen)
-        potential-next-pos (move game-board @(state :pacman-pos) @(state :direction))]
-    (when (and (= 0 partial-frame-val) (open? game-board @(state :pacman-pos) @(state :direction)))
-      (reset! (state :pacman-pos) potential-next-pos))  
-		(text (str partial-frame-val @(state :direction)) 20 60)))
-
+  ; Move Pac Man
+  (when
+    (= 0 (partial-frame))
+    (set-pacman-pos (move-if-open game-board (pacman-pos) (pacman-dir))))
+  
+  ; Draw some debugging text
+  (text (str "DEBUG: " (pacman-dir) " " (partial-frame)) 20 60))
+  
+        
+(defn direction-key-pressed [key-direction]
+    (when 
+      (open? game-board (pacman-pos) key-direction)
+      (set-pacman-dir key-direction)))
+        
 (def key-directions {
   KeyEvent/VK_UP :up
   KeyEvent/VK_DOWN :down
@@ -152,18 +174,18 @@
   \a :left
   \d :right})
 
-(defn key-press []
+(defn key-pressed []
   (let [raw-key (raw-key)
     the-key-code (key-code)
     the-key-pressed (if (= processing.core.PConstants/CODED (int raw-key)) the-key-code raw-key)
     key-direction (get key-directions the-key-pressed nil)]
-    (when (and key-direction (open? game-board @(state :pacman-pos) key-direction))
-      (reset! (state :direction) key-direction))))
+    (when key-direction 
+      (direction-key-pressed key-direction))))
 
 (defn -main [& args]
 	(defsketch pacman 
 		:title "pacman"
 		:setup setup
 		:draw draw
-		:key-pressed key-press
+		:key-pressed key-pressed
 		:size [(:width params) (:height params)]))
