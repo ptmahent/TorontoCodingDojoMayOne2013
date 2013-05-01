@@ -66,16 +66,16 @@
 (deftest move-on-board-test
   (testing "Move left on board"
     (is (= (move [[0 0]
-                         [0 0]] [1 0]  :left) [0 0])))
+                  [0 0]] [1 0]  :left) [0 0])))
   (testing "Move right on board"
     (is (= (move [[0 0]
-                         [0 0]] [0 0] :right) [1 0])))
+                  [0 0]] [0 0] :right) [1 0])))
   (testing "Move up on board"
     (is (= (move [[0 0]
-                         [0 0]] [0 1]    :up) [0 0])))
+                  [0 0]] [0 1]    :up) [0 0])))
   (testing "Move down"
     (is (= (move [[0 0]
-                         [0 0]] [0 0]  :down) [0 1]))))
+                  [0 0]] [0 0]  :down) [0 1]))))
 
 (deftest move-wrap-around-rectangular-board-test
   (testing "Move up wrapping around board"
@@ -135,3 +135,23 @@
   (testing "doesn't move when wall"
     (is (= (move-if-open [[0 1]
                           [0 1]] [0 0] :right) [0 0]))))
+
+(deftest init-dots-test
+  (testing "initing dots"
+    (is (= (init-dots [[0 1]
+                       [0 0]]) #{[0 0]
+                                 [0 1]
+                                 [1 1]})))
+  (testing "no dots"
+    (is (= (init-dots [[1 1]
+                       [1 1]]) #{}))))
+
+
+(deftest eating-dots-test
+  (testing "square has a dot"
+    (is (has-dot? #{[0 0]
+                    [0 1]}
+                    [0 1])))
+   (testing "pacman eats dot at current position"
+    (is (= (eat-dot #{[0 0] [0 1]} [0 0]) #{[0 1]}))))
+

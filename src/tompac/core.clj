@@ -58,18 +58,21 @@
     (move board pos direction)
     pos))
 
+(defn init-dots [board]
+  (let [alldots (for [x (range 0 (board-width board))
+                      y (range 0 (board-height board))]
+                      [x y])]
+  (set (filter #(= (board-at-pos board %) 0) alldots))))
+
+(defn has-dot? [dots pos]
+  (dots pos))
+
+(def eat-dot disj)
+
 ;; Model up from here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graphics here on down
 
-
-(defn setup []
-  (smooth)
-  (frame-rate 60)
-  (set-state!
-      :pacman-pos (atom [9 15]) 
-      :pacman-direction (atom :down)
-      :partial-frame (seq->stream (cycle-between 0 10))))
 
 (defn pacman-pos [] @(state :pacman-pos))
 (defn set-pacman-pos [pos]
@@ -78,6 +81,13 @@
 (defn pacman-dir [] @(state :pacman-direction))
 (defn set-pacman-dir [direction]
   (reset! (state :pacman-direction) direction))
+
+(defn set-dots [dots] 
+  (reset! (state :dots) dots))
+
+
+(defn dots [] @(state :dots))
+
 
 (defn partial-frame [] ((state :partial-frame)))
 
@@ -93,7 +103,7 @@
                  [1 1 1 1 0 1 1 1 0 1 0 1 1 1 0 1 1 1 1]
                  [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
                  [1 1 1 1 0 1 0 1 1 2 1 1 0 1 0 1 1 1 1]
-                 [0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0]
+                 [0 0 0 0 0 0 0 1 3 3 3 1 0 0 0 0 0 0 0]
                  [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
                  [1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 1 1]
                  [1 1 1 1 0 1 0 1 1 1 1 1 0 1 0 1 1 1 1]
@@ -105,6 +115,17 @@
                  [1 0 1 1 1 1 1 1 0 1 0 1 1 1 1 1 1 0 1]
                  [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
                  [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]])
+
+
+(defn setup []
+  (smooth)
+  (frame-rate 60)
+  (set-state!
+      :pacman-pos (atom [9 15]) 
+      :pacman-direction (atom :down)
+      :dots (atom (init-dots game-board))
+      :partial-frame (seq->stream (cycle-between 0 10))))
+  
 
 (def game-board-width (board-width game-board))
 (def game-board-height (board-height game-board))
@@ -123,6 +144,13 @@
 (defn draw-rect [x y width height]
   (rect (cell-top-x x) (cell-top-y y) width height))
 
+(defn draw-dot [x y]
+  (fill 255 255 255)
+  (ellipse (cell-center-x x) 
+           (cell-center-y y)
+           (/ cell-width 4)
+           (/ cell-height 4)))
+
 (defn draw-wall-brick [x y]
   (fill 0 0 255)
   (draw-rect x y cell-width cell-height))
@@ -137,11 +165,15 @@
   ; Draw the Grid
   (doseq [[y row] (map-indexed vector game-board)]
     (doseq [[x value] (map-indexed vector row)]
+      ;; condp #{:dot} #{:wall} #{:dot :ghost}
       (case 
         value
+        0 (if ((dots) [x y]) (draw-dot x y))   
         1 (draw-wall-brick x y)
         2 (draw-ghosts-door x y)
         nil)))
+
+
 
   ; Draw Pac Man
   (fill 255 255 0)
@@ -153,7 +185,8 @@
   ; Move Pac Man
   (when
     (= 0 (partial-frame))
-    (set-pacman-pos (move-if-open game-board (pacman-pos) (pacman-dir))))
+    (set-pacman-pos (move-if-open game-board (pacman-pos) (pacman-dir)))
+    (set-dots (eat-dot (dots) (pacman-pos))))
   
   ; Draw some debugging text
   (text (str "DEBUG: " (pacman-dir) " " (partial-frame)) 20 60))
